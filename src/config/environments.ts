@@ -2,7 +2,7 @@
  * Target environments, selected with TEST_ENV=local|qa|staging|prod (default: qa).
  *
  * ParaBank only has one public instance, so qa / staging / prod all point at the same URL
- * for now. When real hosts exist, change `baseUrl` here (or set BASE_URL in .env.<env>).
+ * for now. When real hosts exist, change `baseUrl` here (or set BASE_URL for a single run).
  * `local` is a private ParaBank in Docker (see docker-compose.yml).
  */
 export type EnvironmentName = 'local' | 'qa' | 'staging' | 'prod';
@@ -28,4 +28,6 @@ export const ENVIRONMENTS: Record<EnvironmentName, EnvironmentConfig> = {
   prod: { baseUrl: PARABANK_URL, allowDataChanges: false, workers: 2 },
 };
 
-export const isEnvironmentName = (value: string): value is EnvironmentName => value in ENVIRONMENTS;
+// Object.hasOwn, not `in`: `in` also matches inherited properties such as "toString".
+export const isEnvironmentName = (value: string): value is EnvironmentName =>
+  Object.hasOwn(ENVIRONMENTS, value);

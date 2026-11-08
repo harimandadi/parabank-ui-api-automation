@@ -71,7 +71,7 @@ flowchart TD
     P --> C["Config<br/>src/config (env, environments)"]
     A --> C
     T --> D["Test data<br/>test-data/*.json"]
-    C --> E[".env / .env.&lt;env&gt; / CI secrets"]
+    C --> E[".env / CI secrets"]
     P --> APP[("ParaBank<br/>public site or Docker")]
     A --> APP
 ```
@@ -225,9 +225,8 @@ npm run report
 ### Where values come from (highest priority first)
 
 1. Real environment variables (your terminal, CI secrets)
-2. `.env.<TEST_ENV>`, e.g. `.env.staging` (optional, git-ignored)
-3. `.env`
-4. Defaults in `src/config/environments.ts`
+2. `.env`
+3. Defaults in `src/config/environments.ts`
 
 If a required variable is missing, the test stops with a clear message such as *"Missing PARABANK_PASSWORD. Add it to .env (see .env.example)…"*.
 
@@ -242,7 +241,7 @@ Defined in [`src/config/environments.ts`](src/config/environments.ts):
 | `staging` | `https://parabank.parasoft.com` | 2 | run |
 | `prod` | `https://parabank.parasoft.com` | 2 | **skipped** |
 
-ParaBank has only one public instance, so `qa`, `staging` and `prod` share a URL for now. To point an environment somewhere else, change its `baseUrl` or set `BASE_URL` in `.env.<env>`.
+ParaBank has only one public instance, so `qa`, `staging` and `prod` share a URL for now. To point an environment somewhere else, change its `baseUrl` in `environments.ts`, or set `BASE_URL` for a single run.
 
 ### Setting a variable for one run
 
