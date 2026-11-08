@@ -3,7 +3,11 @@ import { ENV } from '../../../src/config/env';
 import { CustomerDetails } from '../../../src/pages/RegisterPage';
 import data from '../../../test-data/registerData.json';
 
-const newCustomer = (overrides: Partial<CustomerDetails> = {}): CustomerDetails => ({
+/** e.g. john123_mhq8x2k9 - unique per call, even for tests running in parallel. */
+const uniqueUsername = (): string =>
+  `${ENV.registerUsername}_${Date.now().toString(36)}${Math.floor(Math.random() * 1296).toString(36)}`;
+
+const newCustomer =(overrides: Partial<CustomerDetails> = {}): CustomerDetails => ({
   ...data.customer,
   username: ENV.registerUsername,
   password: ENV.registerPassword,
@@ -40,7 +44,7 @@ test.describe('Register - UI', () => {
   // Tagged @creates-account: submits a real registration on the target site.
   // A username can only be registered once, so each run uses a unique one.
   test('new user can register and then log in @creates-account', async ({ registerPage, loginPage, accountsOverviewPage }) => {
-    const username = `${ENV.registerUsername}_${Date.now().toString().slice(-7)}`;
+    const username = uniqueUsername();
     await registerPage.register(newCustomer({ username }));
 
     await expect(registerPage.welcomeHeading).toHaveText(`Welcome ${username}`);
@@ -51,9 +55,17 @@ test.describe('Register - UI', () => {
     await expect(accountsOverviewPage.heading).toBeVisible();
   });
 
-  // ENV.registerUsername (john123) is already registered on ParaBank, so this is rejected.
-  test('registering an existing username shows an error', async ({ registerPage }) => {
-    await registerPage.register(newCustomer());
+  // Self-contained: creates its own user, then tries to register the same username again,
+  // so it works on any database (fresh Docker instance or the shared public site).
+  test('registering an existing username shows an error @creates-account', async ({ page, registerPage, accountsOverviewPage }) => {
+    const username = uniqueUsername();
+    await registerPage.register(newCustomer({ username }));
+    await expect(registerPage.welcomeHeading).toHaveText(`Welcome ${username}`);
+    await accountsOverviewPage.logout();
+
+    await registerPage.goto();
+    await registerPage.register(newCustomer({ username }));
     await expect(registerPage.fieldError('customer.username')).toHaveText(data.messages.usernameExists);
+    await expect(page).not.toHaveURL(/overview/);
   });
 });

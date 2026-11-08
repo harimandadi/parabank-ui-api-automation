@@ -10,7 +10,7 @@ import { ENV } from './src/config/env';
  * ParaBank is a shared public demo behind Cloudflare, which rate-limits (Error 1015 / HTTP 429)
  * bursts of requests from one IP. These defaults keep the load low:
  *  - Chromium only by default; set ALL_BROWSERS=1 to add Firefox and WebKit.
- *  - At most 2 workers locally (WORKERS=n to override), 1 on CI.
+ *  - 2 workers on the public site, 4 on local Docker (WORKERS=n to override).
  *  - Login happens once in the `setup` project; Account Services tests reuse the saved session.
  *  - Agent seed files are skipped in normal runs; the Playwright agents' MCP server sets PW_AGENTS=1.
  */
@@ -22,8 +22,11 @@ const ALLURE_RESULTS = 'allure-results';
 
 // Start each run with empty Allure results (main process only - workers also load this file).
 // History is kept separately in allure-report/history by `npm run allure:generate`.
-if (!process.env.TEST_WORKER_INDEX) {
-  fs.rmSync(ALLURE_RESULTS, { recursive: true, force: true });
+// Only the contents are removed: in Docker the folder itself is a mounted volume.
+if (!process.env.TEST_WORKER_INDEX && fs.existsSync(ALLURE_RESULTS)) {
+  for (const entry of fs.readdirSync(ALLURE_RESULTS)) {
+    fs.rmSync(`${ALLURE_RESULTS}/${entry}`, { recursive: true, force: true });
+  }
 }
 
 const reporters: ReporterDescription[] = [
@@ -73,15 +76,17 @@ export default defineConfig({
   forbidOnly: isCI,
   /* Retry on CI only */
   retries: isCI ? 2 : 0,
-  /* Keep concurrent sessions low to avoid ParaBank's rate limit. */
-  workers: process.env.WORKERS ? Number(process.env.WORKERS) : isCI ? 1 : 2,
+  /* Per-environment default (low on the rate-limited public site, higher on local Docker). */
+  workers: process.env.WORKERS ? Number(process.env.WORKERS) : ENV.workers,
   reporter: reporters,
   use: {
     baseURL: ENV.baseUrl,
-    /* Failure evidence - attached to both the HTML and the Allure report. */
+    /* Failure evidence - attached to both the HTML and the Allure report.
+       Trace is cheap and has a full timeline with screenshots, so it is kept for every failure.
+       Video is expensive (it records every test, roughly +50% run time), so only on retries. */
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
     trace: 'retain-on-failure',
+    video: 'on-first-retry',
   },
 
   projects: [
