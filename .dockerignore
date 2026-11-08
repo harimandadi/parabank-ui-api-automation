@@ -10,4 +10,5 @@ blob-report
 test-results
 allure-results
 allure-report
+allure-report-single
 .claude/settings.local.json

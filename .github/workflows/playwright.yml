@@ -57,6 +57,7 @@ jobs:
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
+        # Single self-contained index.html: opens with a double-click after download.
         name: allure-report-${{ env.TEST_ENV }}
-        path: allure-report/
+        path: allure-report-single/
         retention-days: 30
