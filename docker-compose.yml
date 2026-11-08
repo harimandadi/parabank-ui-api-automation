@@ -1,0 +1,42 @@
+# Runs the whole suite in Docker against a private ParaBank instance - no public-site
+# rate limit, isolated data, so tests can run with more workers.
+#
+#   docker compose up --build --abort-on-container-exit --exit-code-from tests
+#   (or: npm run docker:test)
+#
+# Reports are written back to ./playwright-report, ./allure-results and ./test-results.
+services:
+  parabank:
+    image: parasoft/parabank:latest
+    ports:
+      - "8080:8080" # also reachable from the host at http://localhost:8080/parabank
+
+  tests:
+    build: .
+    depends_on:
+      - parabank
+    ipc: host # recommended by Playwright for Chromium in Docker
+    env_file:
+      - path: .env # credentials, if present (git-ignored)
+        required: false
+    environment:
+      TEST_ENV: local
+      BASE_URL: http://parabank:8080
+      WORKERS: ${WORKERS:-4}
+    # Tests write reports inside the container (fast) and copy them out once at the end.
+    # Writing straight into a Windows/macOS bind mount during the run made it ~3x slower.
+    volumes:
+      - ./playwright-report:/out/playwright-report
+      - ./allure-results:/out/allure-results
+      - ./test-results:/out/test-results
+    command:
+      - sh
+      - -c
+      - |
+        node scripts/wait-for-url.mjs http://parabank:8080/parabank/index.htm && npx playwright test
+        status=$$?
+        for d in playwright-report allure-results test-results; do
+          rm -rf /out/$$d/* /out/$$d/.[!.]* 2>/dev/null
+          [ -d "$$d" ] && cp -r "$$d/." "/out/$$d/"
+        done
+        exit $$status

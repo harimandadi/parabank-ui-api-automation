@@ -39,6 +39,7 @@ export const ENV = {
   name: envName,
   baseUrl: process.env.BASE_URL ?? envConfig.baseUrl,
   allowDataChanges: envConfig.allowDataChanges,
+  workers: envConfig.workers,
   appPath: '/parabank',
   apiPath: '/parabank/services/bank',
   // Secrets are read lazily, so listing tests or loading the config works without them.

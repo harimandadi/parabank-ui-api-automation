@@ -14,39 +14,47 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    # Run inside Playwright's official image: Node, browsers and OS libraries are preinstalled,
+    # so there is no "install browsers" step. Keep the tag in sync with @playwright/test.
+    container:
+      image: mcr.microsoft.com/playwright:v1.65.0-noble
+      options: --ipc=host
     env:
+      HOME: /root
       TEST_ENV: ${{ inputs.test_env || 'qa' }}
       # Set these in GitHub: Settings > Secrets and variables > Actions
       PARABANK_USERNAME: ${{ secrets.PARABANK_USERNAME }}
       PARABANK_PASSWORD: ${{ secrets.PARABANK_PASSWORD }}
       PARABANK_REGISTER_PASSWORD: ${{ secrets.PARABANK_REGISTER_PASSWORD }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
+    - uses: actions/checkout@v7
+    - name: Cache npm downloads
+      uses: actions/cache@v6
       with:
-        node-version: lts/*
-    - uses: actions/setup-java@v4
+        path: ~/.npm
+        key: npm-${{ hashFiles('package-lock.json') }}
+    - name: Install dependencies
+      run: npm ci --no-audit --no-fund
+    - name: Run Playwright tests (${{ env.TEST_ENV }})
+      run: npx playwright test
+    # Java is only needed to build the Allure report, after the tests.
+    - uses: actions/setup-java@v6
+      if: ${{ !cancelled() }}
       with:
         distribution: temurin
         java-version: '21'
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-    - name: Run Playwright tests (${{ env.TEST_ENV }})
-      run: npx playwright test
     - name: Generate Allure report
       if: ${{ !cancelled() }}
       run: npm run allure:generate
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: playwright-report-${{ env.TEST_ENV }}
         path: playwright-report/
         retention-days: 30
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: allure-report-${{ env.TEST_ENV }}
