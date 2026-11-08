@@ -1,0 +1,29 @@
+{
+  "customer": {
+    "firstName": "John",
+    "lastName": "Tester",
+    "street": "123 Test Street",
+    "city": "Testville",
+    "state": "CA",
+    "zipCode": "90001",
+    "phone": "5551234567",
+    "ssn": "000-00-0000"
+  },
+  "messages": {
+    "success": "Your account was created successfully. You are now logged in.",
+    "usernameExists": "This username already exists.",
+    "passwordMismatch": "Passwords did not match."
+  },
+  "requiredFieldErrors": {
+    "customer.firstName": "First name is required.",
+    "customer.lastName": "Last name is required.",
+    "customer.address.street": "Address is required.",
+    "customer.address.city": "City is required.",
+    "customer.address.state": "State is required.",
+    "customer.address.zipCode": "Zip Code is required.",
+    "customer.ssn": "Social Security Number is required.",
+    "customer.username": "Username is required.",
+    "customer.password": "Password is required.",
+    "repeatedPassword": "Password confirmation is required."
+  }
+}

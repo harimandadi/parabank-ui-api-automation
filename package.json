@@ -1,0 +1,43 @@
+{
+  "name": "parabank-ui-api-automation",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test tests/ui",
+    "test:api": "playwright test tests/api --project=chromium",
+    "test:login": "playwright test login",
+    "test:register": "playwright test register --project=chromium",
+    "test:account-services": "playwright test tests/ui/account-services --project=chromium",
+    "test:qa": "cross-env TEST_ENV=qa playwright test",
+    "test:staging": "cross-env TEST_ENV=staging playwright test",
+    "test:prod": "cross-env TEST_ENV=prod playwright test",
+    "test:all-browsers": "cross-env ALL_BROWSERS=1 WORKERS=1 playwright test",
+    "report": "playwright show-report",
+    "allure:generate": "node scripts/allure-report.mjs",
+    "allure:open": "allure open allure-report",
+    "allure:serve": "allure serve allure-results",
+    "allure:report": "npm run allure:generate && npm run allure:open",
+    "agents:init": "playwright init-agents --loop=claude --project=chromium --prompts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harimandadi/parabank-ui-api-automation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/harimandadi/parabank-ui-api-automation/issues"
+  },
+  "homepage": "https://github.com/harimandadi/parabank-ui-api-automation#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@types/node": "^26.6.6",
+    "allure-commandline": "^2.46.1",
+    "allure-playwright": "^3.14.0",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.9"
+  }
+}

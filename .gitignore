@@ -1,0 +1,58 @@
+# ---------- Dependencies ----------
+node_modules/
+.npm/
+.pnpm-store/
+
+# ---------- Playwright output ----------
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/allure-results/
+/allure-report/
+*.trace.zip
+
+# Saved login session (cookies) from tests/auth.setup.ts - never commit
+/playwright/.auth/
+
+# ---------- Secrets / environment ----------
+# Credentials (PARABANK_USERNAME, PARABANK_PASSWORD, ...) belong here, not in code
+.env
+.env.*
+!.env.example
+
+# ---------- TypeScript / build output ----------
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# ---------- Logs ----------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ---------- Coverage ----------
+coverage/
+.nyc_output/
+
+# ---------- Claude Code ----------
+# Shared agents/prompts in .claude/ ARE committed; personal settings are not
+.claude/settings.local.json
+CLAUDE.local.md
+
+# ---------- Editors / IDEs ----------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# ---------- OS files ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
