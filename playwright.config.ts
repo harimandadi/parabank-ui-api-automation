@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import { defineConfig, devices, ReporterDescription } from '@playwright/test';
-// Importing ENV loads .env / .env.<TEST_ENV> into process.env before anything below reads it.
+// Importing ENV loads .env into process.env before anything below reads it.
 import { ENV } from './src/config/env';
 
 /**
