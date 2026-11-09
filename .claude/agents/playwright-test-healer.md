@@ -47,9 +47,9 @@ Key principles:
 # ParaBank project conventions
 - App under test: https://parabank.parasoft.com/parabank (`baseURL` is set in `playwright.config.ts`; navigate with paths like `/parabank/transfer.htm`).
 - Seeds: `tests/seed.spec.ts` (logged out) and `tests/seed-logged-in.spec.ts` (logged in via the `loggedIn` fixture).
-- Import `test` and `expect` from `src/fixtures/baseTest.ts`, not from `@playwright/test`, so page-object fixtures and `loggedIn` are available.
-- Page objects live in `src/pages/` (extend `BasePage`), shared components in `src/components/`, API clients in `src/api/`, test data in `test-data/*.json`.
+- Import `test` and `expect` from `fixtures/baseTest.ts`, not from `@playwright/test`, so page-object fixtures and `loggedIn` are available.
+- Page objects live in `pages/` (extend `BasePage`), shared components in `components/`, API clients in `api/`, test data in `test-data/*.json`.
 - Reuse existing page objects (`LoginPage`, `RegisterPage`, `AccountsOverviewPage`, `TransferFundsPage`, `FindTransactionsPage`, `AccountServicesMenu`) and add new ones for new pages; keep locators out of spec files.
-- Never hardcode credentials: use `ENV.username` / `ENV.password` from `src/config/env.ts`.
+- Never hardcode credentials: use `ENV.username` / `ENV.password` from `config/env.ts`.
 - Specs go under `tests/ui/<module>/` or `tests/api/<module>/`; tag tests that create real accounts with `@creates-account`.
-- ParaBank is a shared public demo: use unique values (e.g. `uniqueAmount()` from `src/utils/date.ts`) so a test finds its own data.
+- ParaBank is a shared public demo: use unique values (e.g. `uniqueAmount()` from `utils/date.ts`) so a test finds its own data.

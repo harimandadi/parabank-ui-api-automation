@@ -1,6 +1,6 @@
-import { test, expect } from '../../../src/fixtures/baseTest';
-import { AUTH_FILE } from '../../../src/config/auth';
-import { uniqueAmount } from '../../../src/utils/date';
+import { test, expect } from '../../../fixtures/baseTest';
+import { AUTH_FILE } from '../../../config/auth';
+import { uniqueAmount } from '../../../utils/date';
 
 // Start every test already logged in (session saved once by tests/auth.setup.ts).
 test.use({ storageState: AUTH_FILE });

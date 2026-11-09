@@ -1,6 +1,6 @@
-import { test, expect } from '../../../src/fixtures/baseTest';
-import { ENV } from '../../../src/config/env';
-import { CustomerDetails } from '../../../src/pages/RegisterPage';
+import { test, expect } from '../../../fixtures/baseTest';
+import { ENV } from '../../../config/env';
+import { CustomerDetails } from '../../../pages/RegisterPage';
 import data from '../../../test-data/registerData.json';
 
 /** e.g. john123_mhq8x2k9 - unique per call, even for tests running in parallel. */

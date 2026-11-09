@@ -2,11 +2,11 @@
  * Endpoint: /api/getUserDetailByEmail
  *   API 14  GET ?email=... → 200 + user details
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
-import { expectApiCode, expectMethodNotSupported, expectRespondsWithin, expectSchema } from '../../../src/api/automation-exercise/assertions';
-import { AE_MESSAGES, RESPONSE_CODE } from '../../../src/api/automation-exercise/messages';
-import { UserDetailSchema } from '../../../src/api/automation-exercise/schemas';
-import { uniqueId } from '../../../src/api/automation-exercise/test-data/userBuilder';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
+import { expectApiCode, expectMethodNotSupported, expectRespondsWithin, expectSchema } from '../../../api/automation-exercise/assertions';
+import { AE_MESSAGES, RESPONSE_CODE } from '../../../api/automation-exercise/messages';
+import { UserDetailSchema } from '../../../api/automation-exercise/schemas';
+import { uniqueId } from '../../../api/automation-exercise/test-data/userBuilder';
 
 test.describe('API 14: /getUserDetailByEmail', { tag: '@api' }, () => {
   test.describe('positive', () => {

@@ -8,7 +8,7 @@ import { ENVIRONMENTS, isEnvironmentName } from './environments';
  */
 
 // 1. Load .env from the project root (works whichever folder the command is run from).
-dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env'), quiet: true });
+dotenv.config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
 
 // 2. Which environment? (terminal/CI, then .env, then 'qa')
 const name = (process.env.TEST_ENV ?? 'qa').toLowerCase();

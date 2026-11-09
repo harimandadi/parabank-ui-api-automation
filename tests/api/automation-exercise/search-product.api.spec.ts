@@ -3,15 +3,15 @@
  *   API 5  POST with search_product    → 200 + matching products
  *   API 6  POST without search_product → 400 "Bad request, search_product parameter is missing in POST request."
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
 import {
   expectApiCode,
   expectMethodNotSupported,
   expectRespondsWithin,
   expectSchema,
-} from '../../../src/api/automation-exercise/assertions';
-import { AE_MESSAGES, RESPONSE_CODE } from '../../../src/api/automation-exercise/messages';
-import { ProductsListSchema, type Product } from '../../../src/api/automation-exercise/schemas';
+} from '../../../api/automation-exercise/assertions';
+import { AE_MESSAGES, RESPONSE_CODE } from '../../../api/automation-exercise/messages';
+import { ProductsListSchema, type Product } from '../../../api/automation-exercise/schemas';
 
 /** Letters only, lower-case: "T-Shirt" → "tshirt", so "tshirt" matches both spellings. */
 const normalize = (text: string): string => text.toLowerCase().replace(/[^a-z]/g, '');

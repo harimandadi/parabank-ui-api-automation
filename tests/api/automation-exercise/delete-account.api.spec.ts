@@ -2,10 +2,10 @@
  * Endpoint: /api/deleteAccount
  *   API 12  DELETE with email + password → 200 "Account deleted!"
  */
-import { apiTest as test } from '../../../src/fixtures/apiTest';
-import { expectApiCode } from '../../../src/api/automation-exercise/assertions';
-import { AE_MESSAGES, RESPONSE_CODE } from '../../../src/api/automation-exercise/messages';
-import { buildUser } from '../../../src/api/automation-exercise/test-data/userBuilder';
+import { apiTest as test } from '../../../fixtures/apiTest';
+import { expectApiCode } from '../../../api/automation-exercise/assertions';
+import { AE_MESSAGES, RESPONSE_CODE } from '../../../api/automation-exercise/messages';
+import { buildUser } from '../../../api/automation-exercise/test-data/userBuilder';
 
 test.describe('API 12: /deleteAccount', { tag: ['@api', '@auth', '@creates-account', '@modifies-data'] }, () => {
   test.describe('positive', () => {

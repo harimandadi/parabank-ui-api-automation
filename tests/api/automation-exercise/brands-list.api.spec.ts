@@ -3,14 +3,14 @@
  *   API 3  GET → 200 + all brands
  *   API 4  PUT → 405 "This request method is not supported."
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
 import {
   expectFrameworkMethodNotAllowed,
   expectMethodNotSupported,
   expectRespondsWithin,
   expectSchema,
-} from '../../../src/api/automation-exercise/assertions';
-import { BrandsListSchema, ProductsListSchema } from '../../../src/api/automation-exercise/schemas';
+} from '../../../api/automation-exercise/assertions';
+import { BrandsListSchema, ProductsListSchema } from '../../../api/automation-exercise/schemas';
 
 test.describe('API 3-4: /brandsList', { tag: '@api' }, () => {
   test.describe('positive', () => {

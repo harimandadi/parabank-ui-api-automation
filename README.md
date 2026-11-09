@@ -32,8 +32,8 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 
 | Area | What the framework does |
 |---|---|
-| **Page Object Model** | Pages in `src/pages`, shared UI parts in `src/components`, all locators kept out of the tests |
-| **Custom fixtures** | Page objects, API clients and a `loggedIn` state injected into tests via `src/fixtures/baseTest.ts` |
+| **Page Object Model** | Pages in `pages`, shared UI parts in `components`, all locators kept out of the tests |
+| **Custom fixtures** | Page objects, API clients and a `loggedIn` state injected into tests via `fixtures/baseTest.ts` |
 | **UI + API** | Browser tests and REST API tests in one framework, sharing config and data |
 | **API layer** | Service classes + one HTTP client for the [Automation Exercise](https://automationexercise.com/api_list) REST API, with **zod schema validation** of every response (75 tests, see [API testing](#api-testing-automation-exercise)) |
 | **Log in once** | A `setup` project logs in a single time and saves the session (`storageState`); Account Services tests reuse it |
@@ -67,11 +67,11 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 
 ```mermaid
 flowchart TD
-    T["Tests<br/>tests/ui/** · tests/api/**"] --> F["Fixtures<br/>src/fixtures/baseTest.ts"]
-    F --> P["Page objects & components<br/>src/pages · src/components"]
-    F --> A["API clients<br/>src/api"]
+    T["Tests<br/>tests/ui/** · tests/api/**"] --> F["Fixtures<br/>fixtures/baseTest.ts"]
+    F --> P["Page objects & components<br/>pages · components"]
+    F --> A["API clients<br/>api"]
     F --> L["loggedIn + saved session<br/>tests/auth.setup.ts"]
-    P --> C["Config<br/>src/config (env, environments)"]
+    P --> C["Config<br/>config (env, environments)"]
     A --> C
     T --> D["Test data<br/>test-data/*.json"]
     C --> E[".env / CI secrets"]
@@ -98,17 +98,17 @@ parabank-ui-api-automation/
 │   ├── allure-report.mjs      Builds the Allure report and keeps trend history
 │   └── wait-for-url.mjs       Waits until ParaBank is up (used by Docker)
 ├── specs/                     Test plans written by the planner agent
-├── src/
-│   ├── api/automation-exercise/  Automation Exercise API: client, services, schemas, test data
-│   ├── components/            Shared UI parts (AccountServicesMenu)
-│   ├── config/
-│   │   ├── env.ts             Loads .env files, exposes ENV (URL, credentials, workers)
-│   │   ├── environments.ts    local / qa / staging / prod definitions
-│   │   └── auth.ts            Path of the saved login session
-│   ├── fixtures/baseTest.ts   ParaBank UI fixtures, loggedIn, automatic Allure labels
-│   ├── fixtures/apiTest.ts    Automation Exercise API fixtures (no browser, no ParaBank)
-│   ├── pages/                 Page objects (Login, Register, Transfer Funds, ...)
-│   └── utils/                 Helpers (dates, unique amounts, random strings)
+├── api/automation-exercise/  Automation Exercise API: client, services, schemas, test data
+├── components/               Shared UI parts (AccountServicesMenu)
+├── config/
+│   ├── env.ts                Loads .env files, exposes ENV (URL, credentials, workers)
+│   ├── environments.ts       local / qa / staging / prod definitions
+│   └── auth.ts               Path of the saved login session
+├── fixtures/
+│   ├── baseTest.ts           ParaBank UI fixtures, loggedIn, automatic Allure labels
+│   └── apiTest.ts            Automation Exercise API fixtures (no browser, no ParaBank)
+├── pages/                    Page objects (Login, Register, Transfer Funds, ...)
+├── utils/                    Helpers (dates, unique amounts, random strings)
 ├── test-data/                 JSON test data and expected messages
 ├── tests/
 │   ├── auth.setup.ts          Logs in once and saves the session
@@ -230,13 +230,13 @@ npm run report
 
 1. Real environment variables (your terminal, CI secrets)
 2. `.env`
-3. Defaults in `src/config/environments.ts`
+3. Defaults in `config/environments.ts`
 
 If a required variable is missing, the test stops with a clear message such as *"Missing PARABANK_PASSWORD. Add it to .env (see .env.example)…"*.
 
 ### Environments
 
-Defined in [`src/config/environments.ts`](src/config/environments.ts):
+Defined in [`config/environments.ts`](config/environments.ts):
 
 | `TEST_ENV` | URL | Workers | Data-changing tests |
 |---|---|---|---|
@@ -479,16 +479,16 @@ REST API tests for the public practice API at https://automationexercise.com/api
 ```
 tests/api/automation-exercise/*.api.spec.ts     WHAT is tested (one file per endpoint)
         │ uses fixtures
-src/fixtures/apiTest.ts                          injects services; registeredUser = create + always delete
+fixtures/apiTest.ts                              injects services; registeredUser = create + always delete
         │ creates
-src/api/automation-exercise/services/*.ts        HOW to call each resource (ProductsApi, BrandsApi, AuthApi, AccountApi)
+api/automation-exercise/services/*.ts            HOW to call each resource (ProductsApi, BrandsApi, AuthApi, AccountApi)
         │ call
-src/api/automation-exercise/ApiClient.ts         the ONLY place that does HTTP: form bodies, JSON parsing, timing, report steps
+api/automation-exercise/ApiClient.ts             the ONLY place that does HTTP: form bodies, JSON parsing, timing, report steps
         │ results checked with
-src/api/automation-exercise/assertions.ts        expectApiCode · expectSchema · expectMethodNotSupported · expectRespondsWithin
-src/api/automation-exercise/schemas.ts           zod schemas → runtime validation AND TypeScript types
-src/api/automation-exercise/messages.ts          response codes + exact messages in one place
-src/api/automation-exercise/test-data/userBuilder.ts   unique test users (no clashes on a shared server)
+api/automation-exercise/assertions.ts            expectApiCode · expectSchema · expectMethodNotSupported · expectRespondsWithin
+api/automation-exercise/schemas.ts               zod schemas → runtime validation AND TypeScript types
+api/automation-exercise/messages.ts              response codes + exact messages in one place
+api/automation-exercise/test-data/userBuilder.ts       unique test users (no clashes on a shared server)
 ```
 
 | Layer | Responsibility | Why |
@@ -556,7 +556,7 @@ The second command skips tests tagged `@auth` (those that send login details or 
 
 Example: adding **Bill Pay**.
 
-**1. Create a page object:** `src/pages/BillPayPage.ts`
+**1. Create a page object:** `pages/BillPayPage.ts`
 
 ```ts
 import { Locator, Page, test } from '@playwright/test';
@@ -581,7 +581,7 @@ export class BillPayPage extends BasePage {
 }
 ```
 
-**2. Register it as a fixture** in `src/fixtures/baseTest.ts`:
+**2. Register it as a fixture** in `fixtures/baseTest.ts`:
 
 ```ts
 billPayPage: async ({ page }, use) => use(new BillPayPage(page)),
@@ -590,8 +590,8 @@ billPayPage: async ({ page }, use) => use(new BillPayPage(page)),
 **3. Write the spec:** `tests/ui/account-services/bill-pay.spec.ts`
 
 ```ts
-import { test, expect } from '../../../src/fixtures/baseTest';
-import { AUTH_FILE } from '../../../src/config/auth';
+import { test, expect } from '../../../fixtures/baseTest';
+import { AUTH_FILE } from '../../../config/auth';
 
 test.use({ storageState: AUTH_FILE }); // start already logged in
 
@@ -609,7 +609,7 @@ test.describe('Account Services - Bill Pay', () => {
 
 **Conventions**
 
-- Import `test` and `expect` from `src/fixtures/baseTest`, not from `@playwright/test`.
+- Import `test` and `expect` from `fixtures/baseTest`, not from `@playwright/test`.
 - Keep locators in page objects, never in specs.
 - Never hardcode credentials. Use `ENV.username` / `ENV.password`.
 - Tag tests that create or change data, so `prod` skips them.

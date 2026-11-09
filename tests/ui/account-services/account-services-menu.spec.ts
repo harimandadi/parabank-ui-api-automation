@@ -1,6 +1,6 @@
-import { test, expect } from '../../../src/fixtures/baseTest';
-import { AUTH_FILE } from '../../../src/config/auth';
-import { ACCOUNT_SERVICES_LINKS } from '../../../src/components/AccountServicesMenu';
+import { test, expect } from '../../../fixtures/baseTest';
+import { AUTH_FILE } from '../../../config/auth';
+import { ACCOUNT_SERVICES_LINKS } from '../../../components/AccountServicesMenu';
 
 // Start every test already logged in (session saved once by tests/auth.setup.ts).
 test.use({ storageState: AUTH_FILE });
