@@ -11,4 +11,5 @@ test-results
 allure-results
 allure-report
 allure-report-single
+junit-results
 .claude/settings.local.json

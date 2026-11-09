@@ -14,7 +14,7 @@ import { BrandsListSchema, ProductsListSchema } from '../../../api/automation-ex
 
 test.describe('API 3-4: /brandsList', { tag: '@api' }, () => {
   test.describe('positive', () => {
-    test('GET returns all brands and matches the BrandsList schema (API 3)', async ({ brandsApi }) => {
+    test('GET returns all brands and matches the BrandsList schema (API 3)', { tag: '@smoke' }, async ({ brandsApi }) => {
       const result = await brandsApi.getAll();
 
       expect(result.httpStatus).toBe(200);

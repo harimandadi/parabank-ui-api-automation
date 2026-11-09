@@ -38,6 +38,8 @@ if (!process.env.TEST_WORKER_INDEX && fs.existsSync(ALLURE_RESULTS)) {
 const reporters: ReporterDescription[] = [
   [isCI ? 'github' : 'list'],
   ['html', { outputFolder: 'playwright-report', open: 'never' }],
+  // JUnit XML: the standard format CI servers read (Jenkins test trends, GitLab, Azure DevOps).
+  ['junit', { outputFile: 'junit-results/results.xml' }],
   [
     'allure-playwright',
     {

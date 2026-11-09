@@ -1,8 +1,9 @@
 # ParaBank UI + API Automation
+https://automationexercise.com/api_list
 
 [![Playwright Tests](https://github.com/harimandadi/parabank-ui-api-automation/actions/workflows/playwright.yml/badge.svg)](https://github.com/harimandadi/parabank-ui-api-automation/actions/workflows/playwright.yml)
 
-End-to-end test automation framework for the [ParaBank](https://parabank.parasoft.com/parabank/index.htm) demo banking application, built with **Playwright + TypeScript**. It covers the ParaBank UI, plus REST API tests for [Automation Exercise](https://automationexercise.com/api_list), and runs locally, in Docker and in GitHub Actions, and produces Playwright HTML and Allure reports.
+End-to-end test automation framework for the [ParaBank](https://parabank.parasoft.com/parabank/index.htm) demo banking application, built with **Playwright + TypeScript**. It covers the ParaBank UI, plus REST API tests for [Automation Exercise](https://automationexercise.com/api_list), and runs locally, in Docker, in GitHub Actions and in Jenkins, and produces Playwright HTML and Allure reports.
 
 ---
 
@@ -19,12 +20,15 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 9. [Running in Docker](#running-in-docker)
 10. [Reports](#reports)
 11. [CI/CD with GitHub Actions](#cicd-with-github-actions)
-12. [Test coverage](#test-coverage)
-13. [API testing: Automation Exercise](#api-testing-automation-exercise)
-14. [Writing a new test](#writing-a-new-test)
-15. [AI test agents (planner, generator, healer)](#ai-test-agents-planner-generator-healer)
-16. [Design decisions](#design-decisions)
-17. [Troubleshooting](#troubleshooting)
+12. [CI/CD with Jenkins](#cicd-with-jenkins)
+13. [Test coverage](#test-coverage)
+14. [Data-driven tests](#data-driven-tests)
+15. [Utilities](#utilities)
+16. [API testing: Automation Exercise](#api-testing-automation-exercise)
+17. [Writing a new test](#writing-a-new-test)
+18. [AI test agents (planner, generator, healer)](#ai-test-agents-planner-generator-healer)
+19. [Design decisions](#design-decisions)
+20. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -43,7 +47,9 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 | **Docker** | Tests run in the official Playwright image against a private ParaBank container |
 | **Reporting** | Playwright HTML report + Allure (business-level steps, Epic/Feature/Story, failure categories, trend history) |
 | **Failure evidence** | Screenshot and full trace for every failure; video on retries |
-| **CI** | GitHub Actions in a Playwright container, environment picker, report artifacts |
+| **Data-driven tests** | One login test runs per row from JSON, CSV and Excel files, each row validated with a schema |
+| **CI** | GitHub Actions and a Jenkinsfile, both in the Playwright container, with an environment picker and report artifacts |
+| **Prompts** | Reusable AI prompts for adding UI, API and data-driven tests in this framework's style (`prompts/`) |
 | **AI agents** | Playwright test planner / generator / healer agents for Claude Code |
 
 ---
@@ -59,7 +65,8 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 | cross-env | Sets environment variables in npm scripts on any OS |
 | allure-playwright + allure-commandline | Allure reporting |
 | Docker / Docker Compose | Containerised test runs and a private ParaBank |
-| GitHub Actions | Continuous integration |
+| GitHub Actions / Jenkins | Continuous integration |
+| exceljs | Reads the Excel test data |
 
 ---
 
@@ -96,8 +103,10 @@ parabank-ui-api-automation/
 ├── .github/workflows/         GitHub Actions pipeline (playwright.yml)
 ├── scripts/
 │   ├── allure-report.mjs      Builds the Allure report and keeps trend history
+│   ├── build-login-excel.cjs  Recreates the Excel login test data
 │   └── wait-for-url.mjs       Waits until ParaBank is up (used by Docker)
 ├── specs/                     Test plans written by the planner agent
+├── prompts/                  Reusable AI prompts (UI, API, data-driven, utilities, fixes)
 ├── api/automation-exercise/  Automation Exercise API: client, services, schemas, test data
 ├── components/               Shared UI parts (AccountServicesMenu)
 ├── config/
@@ -108,18 +117,21 @@ parabank-ui-api-automation/
 │   ├── baseTest.ts           ParaBank UI fixtures, loggedIn, automatic Allure labels
 │   └── apiTest.ts            Automation Exercise API fixtures (no browser, no ParaBank)
 ├── pages/                    Page objects (Login, Register, Transfer Funds, ...)
-├── utils/                    Helpers (dates, unique amounts, random strings)
-├── test-data/                 JSON test data and expected messages
+├── utils/                    Shared helpers: dates, random data, strings/currency, retry, tables,
+│                             report attachments, DataReader (JSON / CSV / Excel); index.ts imports all
+├── test-data/                JSON test data and expected messages
+│   └── login/                Data-driven login rows: login-data.json / .csv / .xlsx
 ├── tests/
 │   ├── auth.setup.ts          Logs in once and saves the session
 │   ├── seed*.spec.ts          Starting points for the AI agents
 │   ├── api/automation-exercise/  Automation Exercise API tests (one spec per endpoint)
 │   └── ui/
-│       ├── login/             Login UI tests
+│       ├── login/             Login UI tests + data-driven login (JSON, CSV, Excel)
 │       ├── register/          Registration UI tests
 │       └── account-services/  Menu, Transfer Funds, Find Transactions
 ├── .env.example               Template for local settings and credentials
 ├── Dockerfile                 Test-runner image
+├── Jenkinsfile               Jenkins pipeline
 ├── docker-compose.yml         ParaBank + test runner
 └── playwright.config.ts       Projects, reporters, workers, environment rules
 ```
@@ -270,9 +282,12 @@ TEST_ENV=staging npm test
 | Command | What it runs |
 |---|---|
 | `npm test` | All tests, current `TEST_ENV` (default `qa`), Chromium |
+| `npm run test:smoke` | **Smoke tier:** the 10 critical `@smoke` tests (about 1 minute), run on every push |
+| `npm run test:regression` | **Regression tier:** the full suite (same as `npm test`), e.g. nightly |
 | `npm run test:ui` | UI tests only |
 | `npm run test:api` | Automation Exercise API tests only (same as `test:api:ae`) |
-| `npm run test:login` | Login UI tests |
+| `npm run test:login` | Login UI tests (including data-driven) |
+| `npm run test:data-driven` | Data-driven login tests only (JSON, CSV, Excel) |
 | `npm run test:register` | Registration tests |
 | `npm run test:account-services` | Account Services tests |
 | `npm run test:local` | All tests against a local Docker ParaBank |
@@ -298,10 +313,13 @@ Add them after `--` when using npm scripts, e.g. `npm test -- --headed`.
 
 | Tag | Meaning |
 |---|---|
+| `@smoke` | Critical happy paths, one or two per feature: login, register page, Account Services menu, transfer, Find Transactions, products, brands, search, create account, verify login |
 | `@creates-account` | Registers a new user |
 | `@modifies-data` | Makes a transfer or otherwise changes data |
 
-Both are skipped automatically when `TEST_ENV=prod`.
+`@creates-account` and `@modifies-data` are skipped automatically when `TEST_ENV=prod`.
+
+**Test tiers:** **smoke** (`npm run test:smoke`) answers "is the build basically working?" in about a minute, on every push or deploy. **Regression** (`npm run test:regression`) is the full suite, run nightly or before a release. To add a test to the smoke tier, add `{ tag: '@smoke' }`, keeping the tier small and fast.
 
 ### Rate limits on the public site
 
@@ -395,6 +413,10 @@ Other Allure commands:
 | `npm run allure:open` | Open the last built report |
 | `npm run allure:serve` | Build a temporary report and open it |
 
+### JUnit XML (for CI servers)
+
+Every run also writes `junit-results/results.xml`, the standard format Jenkins, GitLab and Azure DevOps read for pass/fail counts, trends and per-test history. The Jenkinsfile publishes it with the built-in `junit` step.
+
 ### Failure evidence
 
 | Evidence | When |
@@ -456,17 +478,86 @@ npx playwright show-report path/to/playwright-report-qa
 
 ---
 
+## CI/CD with Jenkins
+
+The pipeline is in [`Jenkinsfile`](Jenkinsfile). It runs in the same `mcr.microsoft.com/playwright` image as GitHub Actions.
+
+**Parameters:** `TEST_ENV` (qa / staging / prod) and `SUITE` (smoke, the default / all / ui / api / api-safe).
+
+**Results:** the JUnit step shows pass/fail trends on the job page, and the Playwright and Allure reports are published as tabs.
+
+**Stages:** Install (`npm ci`) → Type check (`tsc`) → Test. After every build, the Playwright and Allure reports are published and the reports and failure evidence are archived.
+
+**One-time setup in Jenkins**
+
+1. Install the plugins: **Docker Pipeline**, plus **HTML Publisher** and **Allure** if you want the report tabs (or remove those two blocks from `post`).
+2. Add credentials (Manage Jenkins → Credentials):
+   - `parabank-user`: kind *Username with password*, holding the ParaBank login
+   - `parabank-register-password`: kind *Secret text*
+3. Create a **Pipeline** job → *Pipeline script from SCM* → this repository → script path `Jenkinsfile`.
+
+---
+
 ## Test coverage
 
 | Module | Type | Spec | Tests |
 |---|---|---|---|
 | Login | UI | `tests/ui/login/login.spec.ts` | Form elements · valid login + logout · invalid credentials · empty credentials |
+| Login (data-driven) | UI | `tests/ui/login/login-data-driven.spec.ts` | 17 rows from JSON (5), CSV (6) and Excel (6): valid login, wrong password, unknown user, empty fields, special characters |
 | Register | UI | `tests/ui/register/register.spec.ts` | Form elements · required-field errors · password mismatch · new user registers and logs in · duplicate username rejected |
 | Account Services menu | UI | `tests/ui/account-services/account-services-menu.spec.ts` | Welcome text + all menu links · links open their pages |
 | Transfer Funds | UI | `tests/ui/account-services/transfer-funds.spec.ts` | Form elements · transfer + confirmation · transfer appears in Find Transactions |
 | Find Transactions | UI | `tests/ui/account-services/find-transactions.spec.ts` | All search options · find by date and date range · invalid date validation |
 
-ParaBank is covered by **UI tests only: 17 tests plus 1 setup step** (18 per Chromium run), plus **75 Automation Exercise API tests** in the separate `api` project (next section).
+ParaBank is covered by **UI tests only: 34 tests plus 1 setup step** (35 per Chromium run), plus **75 Automation Exercise API tests** in the separate `api` project: 110 in a full run, 11 in the smoke tier.
+
+---
+
+## Data-driven tests
+
+[`tests/ui/login/login-data-driven.spec.ts`](tests/ui/login/login-data-driven.spec.ts) runs the same login test once per row, reading rows from three files:
+
+| File | Rows |
+|---|---|
+| `test-data/login/login-data.json` | 5 |
+| `test-data/login/login-data.csv` | 6 (one value contains a comma and quotes) |
+| `test-data/login/login-data.xlsx` | 6 (edit it in Excel, or recreate it with `node scripts/build-login-excel.cjs`) |
+
+Columns: `testName`, `username`, `password`, `expected` (`success` / `invalid` / `empty`).
+
+- **One entry point:** `readTestData(file, schema)` in [`utils/DataReader.ts`](utils/DataReader.ts) picks the reader from the file extension.
+- **Validated rows:** every row is checked against a zod schema. A typo such as `expected: "sucess"` fails with the file, row number and column, and the result is typed (`T` inferred from the schema).
+- **No secrets in data files:** `{{PARABANK_USERNAME}}` and `{{PARABANK_PASSWORD}}` are replaced from `.env` or CI secrets when the test runs, so `--list` works without credentials.
+- **Excel is read synchronously:** Playwright needs every row while it collects tests, but `exceljs` only reads asynchronously. `DataReader` therefore runs [`utils/excelReader.cjs`](utils/excelReader.cjs) as a child process and parses its JSON output.
+
+**To add a case**, add a row. No code changes.
+
+---
+
+## Utilities
+
+Shared helpers live in [`utils/`](utils/index.ts). Every helper is typed and documented with an example. You can import them all from one place:
+
+```ts
+import { uniqueAmount, parseCurrency, retry, readTable } from '../../../utils';
+```
+
+| Module | Helpers | Typical use |
+|---|---|---|
+| `date.ts` | `formatDate`, `formatIsoDate`, `parseDate`, `addDays`, `today`, `uniqueAmount` | Date ranges for Find Transactions, unique amounts a test can find again |
+| `random.ts` | `uniqueId`, `randomString`, `randomInt`, `randomEmail`, `randomPhone`, `pickRandom<T>` | Unique test data on shared servers |
+| `string.ts` | `normalizeSpace`, `toTitleCase`, `slugify`, `parseCurrency`, `formatCurrency`, `maskSecret` | Comparing UI text, turning `"$1,234.56"` / `"-$12.00"` into numbers, hiding secrets in logs |
+| `retry.ts` | `retry<T>(fn, { attempts, delayMs, backoff, retryIf })`, `sleep` | Retrying flaky **non-UI** calls, e.g. an API that rate-limits. For the page, use web-first assertions. |
+| `table.ts` | `readTable(locator)` | HTML table → `[{ header: cell }]`, used by `AccountsOverviewPage.getAccounts()` |
+| `attach.ts` | `attachJson`, `attachText` | Add API bodies or generated data to the HTML and Allure reports |
+| `DataReader.ts` | `readTestData<T>(file, schema)`, `readJson`, `readCsv`, `readExcel` | Data-driven tests (see above) |
+
+Example from the login test: the accounts table is read as numbers rather than text.
+
+```ts
+const accounts = await accountsOverviewPage.getAccounts(); // readTable + parseCurrency
+// [{ account: '13344', balance: 515.5, available: 515.5 }, ...]
+```
 
 ---
 

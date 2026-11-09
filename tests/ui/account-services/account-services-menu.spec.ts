@@ -8,7 +8,7 @@ test.use({ storageState: AUTH_FILE });
 test.describe('Account Services - Menu', () => {
   test.beforeEach(async ({ loggedIn }) => {});
 
-  test('UI: shows welcome message and all Account Services links in order', async ({ accountServicesMenu }) => {
+  test('UI: shows welcome message and all Account Services links in order', { tag: '@smoke' }, async ({ accountServicesMenu }) => {
     await expect(accountServicesMenu.welcomeText).toContainText('Welcome');
     await expect(accountServicesMenu.welcomeText).not.toHaveText('Welcome');
     await expect(accountServicesMenu.heading).toBeVisible();

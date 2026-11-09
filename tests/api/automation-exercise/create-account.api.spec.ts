@@ -24,7 +24,7 @@ test.describe('API 11: /createAccount', { tag: '@api' }, () => {
   });
 
   test.describe('positive', () => {
-    test('creates an account → 201 "User created!" (API 11)', { tag: ['@auth', '@creates-account'] }, async ({ accountApi }) => {
+    test('creates an account → 201 "User created!" (API 11)', { tag: ['@smoke', '@auth', '@creates-account'] }, async ({ accountApi }) => {
       const user = buildUser();
       created.push(user);
 

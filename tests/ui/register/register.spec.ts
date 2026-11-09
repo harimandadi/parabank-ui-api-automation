@@ -20,7 +20,7 @@ test.describe('Register - UI', () => {
     await registerPage.goto();
   });
 
-  test('register page shows the sign-up form', async ({ registerPage }) => {
+  test('register page shows the sign-up form', { tag: '@smoke' }, async ({ registerPage }) => {
     await expect(registerPage.heading).toBeVisible();
     await expect(registerPage.firstNameInput).toBeVisible();
     await expect(registerPage.usernameInput).toBeVisible();

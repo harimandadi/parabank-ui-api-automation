@@ -34,7 +34,7 @@ test.describe('API 5-6: /searchProduct', { tag: '@api' }, () => {
       });
     }
 
-    test('an exact product name finds that product', async ({ productsApi }) => {
+    test('an exact product name finds that product', { tag: '@smoke' }, async ({ productsApi }) => {
       const { products } = expectSchema(ProductsListSchema, (await productsApi.search('Blue Top')).body, 'ProductsList');
 
       expect(products.map((p) => p.name)).toContain('Blue Top');

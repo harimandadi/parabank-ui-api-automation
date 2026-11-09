@@ -29,9 +29,9 @@ export interface NewUser {
   mobile_number: string;
 }
 
-/** e.g. "mhq8x2k9a7": base-36 time + random, unique per call. */
-export const uniqueId = (): string =>
-  `${Date.now().toString(36)}${Math.floor(Math.random() * 1_679_616).toString(36)}`;
+// One shared implementation (time + per-process counter + random), re-exported for the API specs.
+import { uniqueId } from '../../../utils/random';
+export { uniqueId };
 
 export function buildUser(overrides: Partial<NewUser> = {}): NewUser {
   const id = uniqueId();
