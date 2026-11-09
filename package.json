@@ -5,10 +5,10 @@
   "scripts": {
     "test": "playwright test",
     "test:ui": "playwright test tests/ui",
-    "test:api": "playwright test tests/api --project=chromium",
+    "test:api": "playwright test --project=api",
     "test:api:ae": "playwright test --project=api",
     "test:api:ae:safe": "playwright test --project=api --grep-invert @auth",
-    "test:login": "playwright test login",
+    "test:login": "playwright test tests/ui/login",
     "test:register": "playwright test register --project=chromium",
     "test:account-services": "playwright test tests/ui/account-services --project=chromium",
     "test:local": "cross-env TEST_ENV=local playwright test",

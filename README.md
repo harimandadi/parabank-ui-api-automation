@@ -2,7 +2,7 @@
 
 [![Playwright Tests](https://github.com/harimandadi/parabank-ui-api-automation/actions/workflows/playwright.yml/badge.svg)](https://github.com/harimandadi/parabank-ui-api-automation/actions/workflows/playwright.yml)
 
-End-to-end test automation framework for the [ParaBank](https://parabank.parasoft.com/parabank/index.htm) demo banking application, built with **Playwright + TypeScript**. It covers the UI and the REST API, runs locally, in Docker and in GitHub Actions, and produces Playwright HTML and Allure reports.
+End-to-end test automation framework for the [ParaBank](https://parabank.parasoft.com/parabank/index.htm) demo banking application, built with **Playwright + TypeScript**. It covers the ParaBank UI, plus REST API tests for [Automation Exercise](https://automationexercise.com/api_list), and runs locally, in Docker and in GitHub Actions, and produces Playwright HTML and Allure reports.
 
 ---
 
@@ -99,20 +99,21 @@ parabank-ui-api-automation/
 │   └── wait-for-url.mjs       Waits until ParaBank is up (used by Docker)
 ├── specs/                     Test plans written by the planner agent
 ├── src/
-│   ├── api/                   API clients (LoginApi)
+│   ├── api/automation-exercise/  Automation Exercise API: client, services, schemas, test data
 │   ├── components/            Shared UI parts (AccountServicesMenu)
 │   ├── config/
 │   │   ├── env.ts             Loads .env files, exposes ENV (URL, credentials, workers)
 │   │   ├── environments.ts    local / qa / staging / prod definitions
 │   │   └── auth.ts            Path of the saved login session
-│   ├── fixtures/baseTest.ts   Custom fixtures, loggedIn, automatic Allure labels
+│   ├── fixtures/baseTest.ts   ParaBank UI fixtures, loggedIn, automatic Allure labels
+│   ├── fixtures/apiTest.ts    Automation Exercise API fixtures (no browser, no ParaBank)
 │   ├── pages/                 Page objects (Login, Register, Transfer Funds, ...)
 │   └── utils/                 Helpers (dates, unique amounts, random strings)
 ├── test-data/                 JSON test data and expected messages
 ├── tests/
 │   ├── auth.setup.ts          Logs in once and saves the session
 │   ├── seed*.spec.ts          Starting points for the AI agents
-│   ├── api/login/             API tests
+│   ├── api/automation-exercise/  Automation Exercise API tests (one spec per endpoint)
 │   └── ui/
 │       ├── login/             Login UI tests
 │       ├── register/          Registration UI tests
@@ -270,8 +271,8 @@ TEST_ENV=staging npm test
 |---|---|
 | `npm test` | All tests, current `TEST_ENV` (default `qa`), Chromium |
 | `npm run test:ui` | UI tests only |
-| `npm run test:api` | API tests only |
-| `npm run test:login` | Login UI + API tests |
+| `npm run test:api` | Automation Exercise API tests only (same as `test:api:ae`) |
+| `npm run test:login` | Login UI tests |
 | `npm run test:register` | Registration tests |
 | `npm run test:account-services` | Account Services tests |
 | `npm run test:local` | All tests against a local Docker ParaBank |
@@ -460,13 +461,12 @@ npx playwright show-report path/to/playwright-report-qa
 | Module | Type | Spec | Tests |
 |---|---|---|---|
 | Login | UI | `tests/ui/login/login.spec.ts` | Form elements · valid login + logout · invalid credentials · empty credentials |
-| Login | API | `tests/api/login/login.api.spec.ts` | Valid credentials return the customer · invalid credentials return 400 |
 | Register | UI | `tests/ui/register/register.spec.ts` | Form elements · required-field errors · password mismatch · new user registers and logs in · duplicate username rejected |
 | Account Services menu | UI | `tests/ui/account-services/account-services-menu.spec.ts` | Welcome text + all menu links · links open their pages |
 | Transfer Funds | UI | `tests/ui/account-services/transfer-funds.spec.ts` | Form elements · transfer + confirmation · transfer appears in Find Transactions |
 | Find Transactions | UI | `tests/ui/account-services/find-transactions.spec.ts` | All search options · find by date and date range · invalid date validation |
 
-There are **19 tests plus 1 setup step** (20 per Chromium run), plus **75 Automation Exercise API tests** in the separate `api` project (next section).
+ParaBank is covered by **UI tests only: 17 tests plus 1 setup step** (18 per Chromium run), plus **75 Automation Exercise API tests** in the separate `api` project (next section).
 
 ---
 

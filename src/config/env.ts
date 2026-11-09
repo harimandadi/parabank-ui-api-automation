@@ -31,7 +31,6 @@ export const ENV = {
   ...ENVIRONMENTS[name], // baseUrl, allowDataChanges, workers
   baseUrl: process.env.BASE_URL ?? ENVIRONMENTS[name].baseUrl,
   appPath: '/parabank',
-  apiPath: '/parabank/services/bank',
   // Getters: a password is only read when a test needs it, so `--list` works without one.
   get username() { return required('PARABANK_USERNAME'); },
   get password() { return required('PARABANK_PASSWORD'); },
