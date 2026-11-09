@@ -4,11 +4,11 @@
  *
  * Uses the `registeredUser` fixture: a fresh account per test, always deleted afterwards.
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
-import { expectApiCode, expectSchema } from '../../../src/api/automation-exercise/assertions';
-import { AE_MESSAGES, RESPONSE_CODE } from '../../../src/api/automation-exercise/messages';
-import { UserDetailSchema } from '../../../src/api/automation-exercise/schemas';
-import { buildUser } from '../../../src/api/automation-exercise/test-data/userBuilder';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
+import { expectApiCode, expectSchema } from '../../../api/automation-exercise/assertions';
+import { AE_MESSAGES, RESPONSE_CODE } from '../../../api/automation-exercise/messages';
+import { UserDetailSchema } from '../../../api/automation-exercise/schemas';
+import { buildUser } from '../../../api/automation-exercise/test-data/userBuilder';
 
 test.describe('API 13: /updateAccount', { tag: ['@api', '@auth', '@creates-account', '@modifies-data'] }, () => {
   test.describe('positive', () => {

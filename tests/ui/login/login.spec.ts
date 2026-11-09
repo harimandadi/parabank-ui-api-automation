@@ -1,5 +1,5 @@
-import { test, expect } from '../../../src/fixtures/baseTest';
-import { ENV } from '../../../src/config/env';
+import { test, expect } from '../../../fixtures/baseTest';
+import { ENV } from '../../../config/env';
 import data from '../../../test-data/loginData.json';
 
 test.describe('Login - UI', () => {

@@ -8,5 +8,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "tests", "test-data", "playwright.config.ts"]
+  "include": ["api", "components", "config", "fixtures", "pages", "utils", "tests", "test-data", "playwright.config.ts"]
 }

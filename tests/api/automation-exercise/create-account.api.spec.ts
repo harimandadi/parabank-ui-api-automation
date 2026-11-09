@@ -4,15 +4,15 @@
  *
  * Every account created here is deleted again in afterEach, even when a test fails.
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
 import {
   expectApiCode,
   expectFrameworkMethodNotAllowed,
   expectSchema,
-} from '../../../src/api/automation-exercise/assertions';
-import { AE_MESSAGES, RESPONSE_CODE } from '../../../src/api/automation-exercise/messages';
-import { UserDetailSchema } from '../../../src/api/automation-exercise/schemas';
-import { buildUser, type NewUser } from '../../../src/api/automation-exercise/test-data/userBuilder';
+} from '../../../api/automation-exercise/assertions';
+import { AE_MESSAGES, RESPONSE_CODE } from '../../../api/automation-exercise/messages';
+import { UserDetailSchema } from '../../../api/automation-exercise/schemas';
+import { buildUser, type NewUser } from '../../../api/automation-exercise/test-data/userBuilder';
 
 test.describe('API 11: /createAccount', { tag: '@api' }, () => {
   /** Accounts this test created, removed after each test. */

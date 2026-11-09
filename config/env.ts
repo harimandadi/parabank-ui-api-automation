@@ -8,7 +8,7 @@ import { ENVIRONMENTS, isEnvironmentName } from './environments';
  */
 
 // 1. Load .env from the project root (works whichever folder the command is run from).
-dotenv.config({ path: path.resolve(__dirname, '..', '..', '.env'), quiet: true });
+dotenv.config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
 
 // 2. Which environment? (terminal/CI, then .env, then 'qa')
 const name = (process.env.TEST_ENV ?? 'qa').toLowerCase();
@@ -31,7 +31,6 @@ export const ENV = {
   ...ENVIRONMENTS[name], // baseUrl, allowDataChanges, workers
   baseUrl: process.env.BASE_URL ?? ENVIRONMENTS[name].baseUrl,
   appPath: '/parabank',
-  apiPath: '/parabank/services/bank',
   // Getters: a password is only read when a test needs it, so `--list` works without one.
   get username() { return required('PARABANK_USERNAME'); },
   get password() { return required('PARABANK_PASSWORD'); },

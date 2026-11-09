@@ -4,7 +4,6 @@ import * as allure from 'allure-js-commons';
 import { ENV } from '../config/env';
 import { LoginPage } from '../pages/LoginPage';
 import { AccountsOverviewPage } from '../pages/AccountsOverviewPage';
-import { LoginApi } from '../api/LoginApi';
 import { RegisterPage } from '../pages/RegisterPage';
 import { TransferFundsPage } from '../pages/TransferFundsPage';
 import { FindTransactionsPage } from '../pages/FindTransactionsPage';
@@ -17,7 +16,6 @@ type Fixtures = {
   transferFundsPage: TransferFundsPage;
   findTransactionsPage: FindTransactionsPage;
   accountServicesMenu: AccountServicesMenu;
-  loginApi: LoginApi;
   /**
    * Lands on Accounts Overview as a logged-in user. Reuses the saved session when the spec
    * uses `test.use({ storageState: AUTH_FILE })`; otherwise (or if the session expired)
@@ -54,7 +52,6 @@ export const test = base.extend<Fixtures>({
   transferFundsPage: async ({ page }, use) => use(new TransferFundsPage(page)),
   findTransactionsPage: async ({ page }, use) => use(new FindTransactionsPage(page)),
   accountServicesMenu: async ({ page }, use) => use(new AccountServicesMenu(page)),
-  loginApi: async ({ request }, use) => use(new LoginApi(request)),
 
   loggedIn: async ({ page, loginPage, accountsOverviewPage }, use) => {
     // Try the saved session first: one page load instead of a full login.

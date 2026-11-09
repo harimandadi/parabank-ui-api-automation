@@ -1,4 +1,4 @@
-import { test } from '../src/fixtures/baseTest';
+import { test } from '../fixtures/baseTest';
 
 /**
  * Logged-in seed for the Playwright agents (planner / generator / healer).

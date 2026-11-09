@@ -7,11 +7,11 @@
  *
  * Tests tagged @auth send login details; the positive one creates (and deletes) a real account.
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
-import { expectApiCode, expectMethodNotSupported, expectSchema } from '../../../src/api/automation-exercise/assertions';
-import { AE_MESSAGES, RESPONSE_CODE } from '../../../src/api/automation-exercise/messages';
-import { ApiMessageSchema } from '../../../src/api/automation-exercise/schemas';
-import { uniqueId } from '../../../src/api/automation-exercise/test-data/userBuilder';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
+import { expectApiCode, expectMethodNotSupported, expectSchema } from '../../../api/automation-exercise/assertions';
+import { AE_MESSAGES, RESPONSE_CODE } from '../../../api/automation-exercise/messages';
+import { ApiMessageSchema } from '../../../api/automation-exercise/schemas';
+import { uniqueId } from '../../../api/automation-exercise/test-data/userBuilder';
 
 /** Made-up details that can never match a real account. */
 const unknownUser = () => ({ email: `nobody.${uniqueId()}@example.invalid`, password: 'not-a-real-password' });

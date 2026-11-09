@@ -3,14 +3,14 @@
  *   API 1  GET  → 200 + all products
  *   API 2  POST → 405 "This request method is not supported."
  */
-import { apiTest as test, expect } from '../../../src/fixtures/apiTest';
+import { apiTest as test, expect } from '../../../fixtures/apiTest';
 import {
   expectFrameworkMethodNotAllowed,
   expectMethodNotSupported,
   expectRespondsWithin,
   expectSchema,
-} from '../../../src/api/automation-exercise/assertions';
-import { ProductsListSchema } from '../../../src/api/automation-exercise/schemas';
+} from '../../../api/automation-exercise/assertions';
+import { ProductsListSchema } from '../../../api/automation-exercise/schemas';
 
 test.describe('API 1-2: /productsList', { tag: '@api' }, () => {
   test.describe('positive', () => {

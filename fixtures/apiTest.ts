@@ -1,5 +1,6 @@
-import { APIRequestContext, request as playwrightRequest } from '@playwright/test';
-import { test as base } from './baseTest';
+import path from 'path';
+import { APIRequestContext, test as base, request as playwrightRequest } from '@playwright/test';
+import * as allure from 'allure-js-commons';
 import { ApiClient } from '../api/automation-exercise/ApiClient';
 import { AE_API } from '../api/automation-exercise/config';
 import { ProductsApi } from '../api/automation-exercise/services/ProductsApi';
@@ -30,9 +31,32 @@ type ApiFixtures = {
    * even when the test fails, so the shared server isn't left with test data.
    */
   registeredUser: NewUser;
+  /** Auto fixture: Allure Epic/Feature/Story labels from the spec's folder path. */
+  allureLabels: void;
 };
 
+const titleCase = (s: string): string =>
+  s.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+// Extends plain Playwright `test`, not the ParaBank UI fixtures: these tests need no browser,
+// no ParaBank pages and no ParaBank login or config.
 export const apiTest = base.extend<ApiFixtures, ApiWorkerFixtures>({
+  // tests/api/automation-exercise/products-list.api.spec.ts
+  //   -> Epic "API", Feature "Automation Exercise", Story "Products List"
+  allureLabels: [
+    async ({}, use, testInfo) => {
+      const [layer, module, file] = path.relative(testInfo.project.testDir, testInfo.file).split(path.sep);
+      if (layer && module && file) {
+        await allure.epic(layer.toUpperCase());
+        await allure.feature(titleCase(module));
+        await allure.story(titleCase(file.replace(/(\.api)?\.spec\.ts$/, '')));
+      }
+      await allure.parameter('api', AE_API.baseUrl);
+      await use();
+    },
+    { auto: true },
+  ],
+
   aeRequest: [
     async ({}, use) => {
       const context = await playwrightRequest.newContext({ baseURL: AE_API.baseUrl });

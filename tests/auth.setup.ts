@@ -1,6 +1,6 @@
-import { test as setup, expect } from '../src/fixtures/baseTest';
-import { ENV } from '../src/config/env';
-import { AUTH_FILE } from '../src/config/auth';
+import { test as setup, expect } from '../fixtures/baseTest';
+import { ENV } from '../config/env';
+import { AUTH_FILE } from '../config/auth';
 
 /**
  * Runs once before the browser projects (see `setup` project in playwright.config.ts).
