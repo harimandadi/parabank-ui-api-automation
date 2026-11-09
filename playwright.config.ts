@@ -20,6 +20,12 @@ const isCI = !!process.env.CI;
 
 const ALLURE_RESULTS = 'allure-results';
 
+/* Agent seed files only run for the Playwright agents. */
+const seedIgnore = forAgents ? [] : ['**/seed*.spec.ts'];
+/* Automation Exercise API tests live in their own `api` project (see projects below). */
+const AE_API_TESTS = /automation-exercise[\\/].*\.spec\.ts$/;
+const browserTestIgnore = [...seedIgnore, AE_API_TESTS];
+
 // Start each run with empty Allure results (main process only - workers also load this file).
 // History is kept separately in allure-report/history by `npm run allure:generate`.
 // Only the contents are removed: in Docker the folder itself is a mounted volume.
@@ -67,7 +73,7 @@ const reporters: ReporterDescription[] = [
 
 export default defineConfig({
   testDir: './tests',
-  testIgnore: forAgents ? [] : ['**/seed*.spec.ts'],
+  testIgnore: seedIgnore,
   /* Environments that must not be modified (prod) skip tests that create or change data. */
   grepInvert: ENV.allowDataChanges ? undefined : /@creates-account|@modifies-data/,
   /* Run tests in files in parallel */
@@ -97,12 +103,16 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
+      testIgnore: browserTestIgnore,
     },
     ...(allBrowsers
       ? [
-          { name: 'firefox', use: { ...devices['Desktop Firefox'] }, dependencies: ['setup'] },
-          { name: 'webkit', use: { ...devices['Desktop Safari'] }, dependencies: ['setup'] },
+          { name: 'firefox', use: { ...devices['Desktop Firefox'] }, dependencies: ['setup'], testIgnore: browserTestIgnore },
+          { name: 'webkit', use: { ...devices['Desktop Safari'] }, dependencies: ['setup'], testIgnore: browserTestIgnore },
         ]
       : []),
+    /* Automation Exercise REST API tests: no browser, no ParaBank login, so no `setup` dependency.
+       Run them alone with:  npm run test:api:ae   (or  npx playwright test --project=api) */
+    { name: 'api', testMatch: AE_API_TESTS },
   ],
 });

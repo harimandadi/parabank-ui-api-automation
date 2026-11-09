@@ -20,10 +20,11 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 10. [Reports](#reports)
 11. [CI/CD with GitHub Actions](#cicd-with-github-actions)
 12. [Test coverage](#test-coverage)
-13. [Writing a new test](#writing-a-new-test)
-14. [AI test agents (planner, generator, healer)](#ai-test-agents-planner-generator-healer)
-15. [Design decisions](#design-decisions)
-16. [Troubleshooting](#troubleshooting)
+13. [API testing: Automation Exercise](#api-testing-automation-exercise)
+14. [Writing a new test](#writing-a-new-test)
+15. [AI test agents (planner, generator, healer)](#ai-test-agents-planner-generator-healer)
+16. [Design decisions](#design-decisions)
+17. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -34,6 +35,7 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 | **Page Object Model** | Pages in `src/pages`, shared UI parts in `src/components`, all locators kept out of the tests |
 | **Custom fixtures** | Page objects, API clients and a `loggedIn` state injected into tests via `src/fixtures/baseTest.ts` |
 | **UI + API** | Browser tests and REST API tests in one framework, sharing config and data |
+| **API layer** | Service classes + one HTTP client for the [Automation Exercise](https://automationexercise.com/api_list) REST API, with **zod schema validation** of every response (75 tests, see [API testing](#api-testing-automation-exercise)) |
 | **Log in once** | A `setup` project logs in a single time and saves the session (`storageState`); Account Services tests reuse it |
 | **Environments** | `TEST_ENV=local \| qa \| staging \| prod`, each with its own URL, worker count and safety rules |
 | **Secrets management** | Credentials from `.env` (git-ignored) locally and GitHub Secrets in CI; none in code |
@@ -52,6 +54,7 @@ End-to-end test automation framework for the [ParaBank](https://parabank.parasof
 |---|---|
 | [Playwright Test](https://playwright.dev) 1.65 | Browser automation, API testing, test runner |
 | TypeScript | Typed test code |
+| zod | Response schema validation (runtime checks + TypeScript types from one schema) |
 | dotenv | Loads `.env` files |
 | cross-env | Sets environment variables in npm scripts on any OS |
 | allure-playwright + allure-commandline | Allure reporting |
@@ -463,7 +466,89 @@ npx playwright show-report path/to/playwright-report-qa
 | Transfer Funds | UI | `tests/ui/account-services/transfer-funds.spec.ts` | Form elements · transfer + confirmation · transfer appears in Find Transactions |
 | Find Transactions | UI | `tests/ui/account-services/find-transactions.spec.ts` | All search options · find by date and date range · invalid date validation |
 
-There are **19 tests plus 1 setup step** (20 per Chromium run).
+There are **19 tests plus 1 setup step** (20 per Chromium run), plus **75 Automation Exercise API tests** in the separate `api` project (next section).
+
+---
+
+## API testing: Automation Exercise
+
+REST API tests for the public practice API at https://automationexercise.com/api_list: **14 documented APIs across 8 endpoints, 75 tests**, each endpoint in its own spec file with **positive, negative and edge** cases and **response schema validation**.
+
+### Architecture
+
+```
+tests/api/automation-exercise/*.api.spec.ts     WHAT is tested (one file per endpoint)
+        │ uses fixtures
+src/fixtures/apiTest.ts                          injects services; registeredUser = create + always delete
+        │ creates
+src/api/automation-exercise/services/*.ts        HOW to call each resource (ProductsApi, BrandsApi, AuthApi, AccountApi)
+        │ call
+src/api/automation-exercise/ApiClient.ts         the ONLY place that does HTTP: form bodies, JSON parsing, timing, report steps
+        │ results checked with
+src/api/automation-exercise/assertions.ts        expectApiCode · expectSchema · expectMethodNotSupported · expectRespondsWithin
+src/api/automation-exercise/schemas.ts           zod schemas → runtime validation AND TypeScript types
+src/api/automation-exercise/messages.ts          response codes + exact messages in one place
+src/api/automation-exercise/test-data/userBuilder.ts   unique test users (no clashes on a shared server)
+```
+
+| Layer | Responsibility | Why |
+|---|---|---|
+| Spec | Business expectations only | Tests read like test cases; no URLs or HTTP details |
+| Service | One method per API operation | A changed endpoint is fixed in one place |
+| ApiClient | Every request goes through `send()` | Consistent parsing, timing and report steps; passwords never appear in step names |
+| Schemas (zod) | Shape, types, formats (e.g. price `Rs. 500`) | One definition gives both runtime validation and the TypeScript type (`z.infer`) |
+| Assertions | Reusable checks with clear failure messages | A schema failure lists every broken field path |
+| Fixtures | Inject services; `registeredUser` creates an account and **always deletes it**, even when the test fails | No leftover data on a shared server |
+
+### Endpoints and tests
+
+| Spec file | APIs | Positive | Negative | Edge |
+|---|---|---|---|---|
+| `products-list.api.spec.ts` | 1, 2 | schema, unique ids, known user types | POST / PUT / DELETE → 405 | PATCH → real HTTP 405, response time, JSON served as text/html, stable repeated GET |
+| `brands-list.api.spec.ts` | 3, 4 | schema, unique ids, every product brand exists in brands (cross-endpoint) | PUT / POST / DELETE → 405 | PATCH → real HTTP 405, response time |
+| `search-product.api.spec.ts` | 5, 6 | results match the term (top, tshirt, jean, dress), exact name, results ⊂ all products | missing parameter → 400, GET / PUT / DELETE → 405 | case-insensitive, no match → empty, empty term → all, `%` / XSS / SQL-injection strings safe, 1000-char term, response time |
+| `verify-login.api.spec.ts` | 7–10 | valid login → "User exists!" | missing email / password → 400, unknown user → 404, wrong password → 404, DELETE / GET → 405 | empty values → clean client error |
+| `create-account.api.spec.ts` | 11 | create → 201, read back (end to end), every title | duplicate email, missing email / password → 400 | GET → real HTTP 405 |
+| `update-account.api.spec.ts` | 13 | update → 200, change visible on read-back | unknown account, wrong password → 404 | idempotent repeated PUT |
+| `delete-account.api.spec.ts` | 12 | delete → 200, then not found + can't log in | wrong password (account survives), unknown account → 404, missing password → 400 | deleting twice → 404 |
+| `get-user-detail.api.spec.ts` | 14 | strict schema, password never exposed | unknown email → 404, missing parameter → 400, POST / PUT / DELETE → 405 | exact-match lookup for unusual values, upper-case email, response time |
+
+### API behaviours found by testing (not in the official docs)
+
+| Behaviour | How the framework handles it |
+|---|---|
+| **The HTTP status is always 200**; the real code is in the body as `responseCode` (400, 404, 405…) | `expectApiCode()` checks **both** the HTTP status and `responseCode` |
+| The `Content-Type` is `text/html` although the body is JSON | `ApiClient` parses the text as JSON itself, with a clear error if it isn't JSON |
+| `PATCH`, and `GET` on `createAccount`, return a **real HTTP 405** with a different body: `{ "detail": … }` | `expectFrameworkMethodNotAllowed()` + `FrameworkErrorSchema` |
+| User-detail field names differ from create: `birth_day` / `first_name` / `last_name`, and no password | `UserDetailSchema` matches the real response; a test checks the password is never returned |
+| **Sign-up does not validate email format**: real accounts exist with emails like `not-an-email` or `""` | Edge tests check the lookup is an **exact match** instead of assuming "404" |
+| Search is case-insensitive; an empty term returns every product | Covered by edge tests |
+
+### Running the API tests
+
+The API tests run in their own **`api` project**: no browser and no ParaBank login (`setup`) dependency.
+
+```bash
+npm run test:api:ae
+```
+```bash
+npm run test:api:ae:safe
+```
+
+The second command skips tests tagged `@auth` (those that send login details or create real accounts on the public site).
+
+| Tag | Meaning |
+|---|---|
+| `@api` | every Automation Exercise API test |
+| `@auth` | sends login details or needs a real account |
+| `@creates-account` / `@modifies-data` | creates or changes data; skipped automatically when `TEST_ENV=prod` |
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `AE_BASE_URL` | `https://automationexercise.com/api` | API base URL |
+| `AE_MAX_RESPONSE_MS` | `5000` | Limit for the response-time tests |
+
+**Response-time tests** call the endpoint twice and measure the second call, so connection setup (DNS, TLS, a slow IPv6→IPv4 fallback) isn't counted against the API. The API request context is **shared per worker** for the same reason: on a machine with a broken IPv6 route, every test had been paying about 6 seconds for its first connection; with a shared context the 47 non-`@auth` tests run in under 20 seconds.
 
 ---
 
