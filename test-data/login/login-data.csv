@@ -1,0 +1,7 @@
+testName,username,password,expected
+valid user logs in,{{PARABANK_USERNAME}},{{PARABANK_PASSWORD}},success
+valid user with wrong password,{{PARABANK_USERNAME}},wrong_pass_csv,invalid
+unknown user,nobody_csv_xyz,any_pass_123,invalid
+"password with comma and quotes, like ""p,w""",nobody_csv_xyz,"p,w""1",invalid
+empty password,{{PARABANK_USERNAME}},,empty
+empty username,,any_pass_123,empty

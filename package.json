@@ -4,11 +4,14 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test",
     "test:ui": "playwright test tests/ui",
     "test:api": "playwright test --project=api",
     "test:api:ae": "playwright test --project=api",
     "test:api:ae:safe": "playwright test --project=api --grep-invert @auth",
     "test:login": "playwright test tests/ui/login",
+    "test:data-driven": "playwright test tests/ui/login/login-data-driven.spec.ts",
     "test:register": "playwright test register --project=chromium",
     "test:account-services": "playwright test tests/ui/account-services --project=chromium",
     "test:local": "cross-env TEST_ENV=local playwright test",
@@ -45,6 +48,7 @@
     "allure-playwright": "^3.14.0",
     "cross-env": "^10.1.0",
     "dotenv": "^18.0.9",
+    "exceljs": "^4.4.0",
     "zod": "^4.6.7"
   }
 }

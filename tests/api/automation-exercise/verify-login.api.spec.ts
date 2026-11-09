@@ -18,7 +18,7 @@ const unknownUser = () => ({ email: `nobody.${uniqueId()}@example.invalid`, pass
 
 test.describe('API 7-10: /verifyLogin', { tag: '@api' }, () => {
   test.describe('positive', () => {
-    test('valid email and password → "User exists!" (API 7)', { tag: ['@auth', '@creates-account'] }, async ({ authApi, registeredUser }) => {
+    test('valid email and password → "User exists!" (API 7)', { tag: ['@smoke', '@auth', '@creates-account'] }, async ({ authApi, registeredUser }) => {
       const result = await authApi.verifyLogin({ email: registeredUser.email, password: registeredUser.password });
 
       await expectApiCode(result, RESPONSE_CODE.ok, AE_MESSAGES.userExists);

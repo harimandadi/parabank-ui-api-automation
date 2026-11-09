@@ -8,7 +8,7 @@ test.use({ storageState: AUTH_FILE });
 test.describe('Account Services - Find Transactions', () => {
   test.beforeEach(async ({ loggedIn }) => {});
 
-  test('UI: Find Transactions page shows all search options', async ({ page, accountServicesMenu, findTransactionsPage }) => {
+  test('UI: Find Transactions page shows all search options', { tag: '@smoke' }, async ({ page, accountServicesMenu, findTransactionsPage }) => {
     await accountServicesMenu.openFindTransactions();
 
     await expect(page).toHaveURL(/findtrans\.htm/);

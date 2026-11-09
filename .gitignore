@@ -11,6 +11,7 @@ node_modules/
 /allure-results/
 /allure-report/
 /allure-report-single/
+/junit-results/
 *.trace.zip
 
 # Saved login session (cookies) from tests/auth.setup.ts - never commit

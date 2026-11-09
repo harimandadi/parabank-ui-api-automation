@@ -30,7 +30,7 @@ test.describe('Account Services - Transfer Funds', () => {
     expect(toOptions).toEqual(fromOptions);
   });
 
-  test('transfers funds between accounts and shows confirmation', { tag: '@modifies-data' }, async ({ transferFundsPage }) => {
+  test('transfers funds between accounts and shows confirmation', { tag: ['@smoke', '@modifies-data'] }, async ({ transferFundsPage }) => {
     const amount = uniqueAmount();
     const { from, to } = await transferFundsPage.transfer(amount);
 
